@@ -186,7 +186,7 @@ function doGet(e) {
 
     // Nếu không có hành động nào khớp, trả về lỗi
     const allParams = JSON.stringify(params);
-    const errorMessage = `Hành động không hợp lệ hoặc bị thiếu. Script đã nhận action='${action}'. Toàn bộ tham số: ${allParams}`;
+    const errorMessage = `Hành động không  hợp lệ hoặc bị thiếu. Script đã nhận action='${action}'. Toàn bộ tham số: ${allParams}`;
     return createErrorResponse(errorMessage);
 
   } catch (error) {
