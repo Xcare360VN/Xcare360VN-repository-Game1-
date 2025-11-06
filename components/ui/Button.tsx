@@ -1,12 +1,9 @@
 import React from 'react';
+import htm from 'htm';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-  variant?: 'primary' | 'secondary';
-  className?: string;
-}
+const html = htm.bind(React.createElement);
 
-const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', className = '', ...props }) => {
+const Button = ({ children, variant = 'primary', className = '', ...props }) => {
   const baseClasses = 'font-bold py-3 px-6 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4';
 
   const variantClasses = {
@@ -14,11 +11,11 @@ const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', classNam
     secondary: 'bg-white/20 hover:bg-white/30 text-white focus:ring-white/50'
   };
 
-  return (
-    <button className={`${baseClasses} ${variantClasses[variant]} ${className}`} {...props}>
-      {children}
+  return html`
+    <button className=${`${baseClasses} ${variantClasses[variant]} ${className}`} ...${props}>
+      ${children}
     </button>
-  );
+  `;
 };
 
 export default Button;

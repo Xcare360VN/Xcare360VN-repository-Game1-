@@ -1,39 +1,40 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Topic, Question, Sponsor } from './types';
-import { getTopics, getQuestionsForTopic, getAllQuestions, getSponsors, submitAnswer } from './services/gameService';
-import TopicCard from './components/TopicCard';
-import QuestionCard from './components/QuestionCard';
-import ResultsCard from './components/ResultsCard';
-import SponsorBanner from './components/SponsorBanner';
-import SponsorContentCard from './components/SponsorContentCard';
-import Button from './components/ui/Button';
-import ShareIcon from './components/icons/ShareIcon';
-import ShuffleIcon from './components/icons/ShuffleIcon';
-import Card from './components/ui/Card';
+import htm from 'htm';
+import { Topic, Question, Sponsor } from './types.js';
+import { getTopics, getQuestionsForTopic, getAllQuestions, getSponsors, submitAnswer } from './services/gameService.js';
+import TopicCard from './components/TopicCard.js';
+import QuestionCard from './components/QuestionCard.js';
+import ResultsCard from './components/ResultsCard.js';
+import SponsorBanner from './components/SponsorBanner.js';
+import SponsorContentCard from './components/SponsorContentCard.js';
+import Button from './components/ui/Button.js';
+import ShareIcon from './components/icons/ShareIcon.js';
+import ShuffleIcon from './components/icons/ShuffleIcon.js';
+import Card from './components/ui/Card.js';
 
-type GameState = 'selection' | 'loading' | 'playing' | 'results' | 'finished';
+const html = htm.bind(React.createElement);
 
-const shuffleArray = <T,>(array: T[]): T[] => {
+const shuffleArray = (array) => {
   return array.map(value => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value);
 };
 
-const RANDOM_TOPIC: Topic = {
+const RANDOM_TOPIC = {
   id: 'random',
   name: 'Ngẫu nhiên',
   description: 'Các câu hỏi được trộn từ tất cả các chủ đề.'
 };
 
-const App: React.FC = () => {
-  const [activeSponsor, setActiveSponsor] = useState<Sponsor | null>(null);
-  const [allTopics, setAllTopics] = useState<Topic[]>([]);
-  const [currentTopic, setCurrentTopic] = useState<Topic | null>(null);
-  const [questionBank, setQuestionBank] = useState<Question[]>([]);
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [answeredQuestion, setAnsweredQuestion] = useState<{ question: Question; selectedOption: string } | null>(null);
-  const [gameState, setGameState] = useState<GameState>('loading');
-  const [error, setError] = useState<string | null>(null);
+const App = () => {
+  const [activeSponsor, setActiveSponsor] = useState(null);
+  const [allTopics, setAllTopics] = useState([]);
+  const [currentTopic, setCurrentTopic] = useState(null);
+  const [questionBank, setQuestionBank] = useState([]);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [answeredQuestion, setAnsweredQuestion] = useState(null);
+  const [gameState, setGameState] = useState('loading');
+  const [error, setError] = useState(null);
   const [isCopied, setIsCopied] = useState(false);
   
   // Tải dữ liệu ban đầu: danh sách chủ đề và nhà tài trợ
@@ -55,7 +56,7 @@ const App: React.FC = () => {
     loadInitialData();
   }, []);
 
-  const handleSelectTopic = useCallback(async (topic: Topic) => {
+  const handleSelectTopic = useCallback(async (topic) => {
     setGameState('loading');
     setError(null);
     try {
@@ -118,7 +119,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleAnswer = (option: string) => {
+  const handleAnswer = (option) => {
     if (currentQuestion && currentTopic) {
       const originalTopicId = allTopics.find(t => t.name === currentTopic.name)?.id || 'random';
       submitAnswer(originalTopicId, currentQuestion.id, option);
@@ -148,77 +149,77 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (gameState) {
       case 'loading':
-        return (
-          <Card className="text-center p-12">
+        return html`
+          <${Card} className="text-center p-12">
             <div className="flex justify-center items-center">
               <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
             </div>
             <p className="mt-4 text-cyan-200">Đang tải dữ liệu...</p>
-          </Card>
-        );
+          </>
+        `;
       case 'selection':
-        return (
-          <Card>
+        return html`
+          <${Card}>
             <h2 className="text-2xl font-bold text-center mb-6 text-white">Chọn chế độ chơi</h2>
-            {error && <p className="text-center text-red-400 mb-4">{error}</p>}
+            ${error && html`<p className="text-center text-red-400 mb-4">${error}</p>`}
             <div className="space-y-4">
-              <button onClick={handleSelectRandomMix} className="w-full text-left p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors group">
+              <button onClick=${handleSelectRandomMix} className="w-full text-left p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors group">
                 <div className="flex items-center gap-4">
                   <div className="bg-cyan-500 p-3 rounded-md">
-                    <ShuffleIcon className="w-6 h-6 text-white" />
+                    <${ShuffleIcon} className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-white">{RANDOM_TOPIC.name}</h3>
-                    <p className="text-sm text-cyan-200/80">{RANDOM_TOPIC.description}</p>
+                    <h3 className="font-bold text-lg text-white">${RANDOM_TOPIC.name}</h3>
+                    <p className="text-sm text-cyan-200/80">${RANDOM_TOPIC.description}</p>
                   </div>
                 </div>
               </button>
-              {allTopics.map(topic => (
-                <button key={topic.id} onClick={() => handleSelectTopic(topic)} className="w-full text-left p-4 bg-black/20 rounded-lg hover:bg-black/30 transition-colors">
-                  <h3 className="font-bold text-lg text-cyan-300">{topic.name}</h3>
-                  <p className="text-sm text-cyan-100/80">{topic.description}</p>
+              ${allTopics.map(topic => html`
+                <button key=${topic.id} onClick=${() => handleSelectTopic(topic)} className="w-full text-left p-4 bg-black/20 rounded-lg hover:bg-black/30 transition-colors">
+                  <h3 className="font-bold text-lg text-cyan-300">${topic.name}</h3>
+                  <p className="text-sm text-cyan-100/80">${topic.description}</p>
                 </button>
-              ))}
+              `)}
             </div>
-          </Card>
-        );
+          </>
+        `;
       case 'playing':
       case 'results':
       case 'finished':
-        return (
+        return html`
           <div className="space-y-6">
-            <TopicCard topic={currentTopic} onNewTopic={handleNewGame} isLoading={false} />
-            {gameState === 'playing' && <QuestionCard question={currentQuestion} onAnswer={handleAnswer} isLoading={false} />}
-            {gameState === 'results' && answeredQuestion && (
-              <ResultsCard 
-                question={answeredQuestion.question} 
-                selectedOption={answeredQuestion.selectedOption} 
-                onNextQuestion={handleNextQuestion}
+            <${TopicCard} topic=${currentTopic} onNewTopic=${handleNewGame} isLoading=${false} />
+            ${gameState === 'playing' && html`<${QuestionCard} question=${currentQuestion} onAnswer=${handleAnswer} isLoading=${false} />`}
+            ${gameState === 'results' && answeredQuestion && html`
+              <${ResultsCard} 
+                question=${answeredQuestion.question} 
+                selectedOption=${answeredQuestion.selectedOption} 
+                onNextQuestion=${handleNextQuestion}
               />
-            )}
-            {gameState === 'finished' && (
+            `}
+            ${gameState === 'finished' && html`
               <div className="text-center py-10 bg-black/10 rounded-2xl p-6">
-                <p className="text-lg text-cyan-300 mb-6 font-semibold">{error || 'Đã có lỗi xảy ra.'}</p>
+                <p className="text-lg text-cyan-300 mb-6 font-semibold">${error || 'Đã có lỗi xảy ra.'}</p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <Button onClick={handleShareGame} variant="secondary" className="inline-flex items-center gap-2 w-full sm:w-auto">
-                      <ShareIcon className="w-5 h-5" />
-                      {isCopied ? 'Đã sao chép link!' : 'Chia sẻ trò chơi'}
-                  </Button>
-                  <Button onClick={handleNewGame}>
+                  <${Button} onClick=${handleShareGame} variant="secondary" className="inline-flex items-center gap-2 w-full sm:w-auto">
+                      <${ShareIcon} className="w-5 h-5" />
+                      ${isCopied ? 'Đã sao chép link!' : 'Chia sẻ trò chơi'}
+                  </>
+                  <${Button} onClick=${handleNewGame}>
                     Chơi lại
-                  </Button>
+                  </>
                 </div>
               </div>
-            )}
-            <SponsorContentCard sponsor={activeSponsor} />
+            `}
+            <${SponsorContentCard} sponsor=${activeSponsor} />
           </div>
-        );
+        `;
       default:
         return null;
     }
   };
 
-  return (
+  return html`
     <div className="min-h-screen bg-gradient-to-br from-cyan-900 via-blue-900 to-violet-900 text-white font-sans flex flex-col p-4 md:p-8">
       <main className="w-full max-w-2xl mx-auto flex-grow">
         <header className="text-center mb-8 md:mb-12">
@@ -228,12 +229,12 @@ const App: React.FC = () => {
           <p className="text-cyan-200/80 mt-2">Bạn đang ở nhóm nào?</p>
         </header>
 
-        {renderContent()}
+        ${renderContent()}
       </main>
       
-      <SponsorBanner sponsor={activeSponsor} />
+      <${SponsorBanner} sponsor=${activeSponsor} />
     </div>
-  );
+  `;
 };
 
 export default App;
