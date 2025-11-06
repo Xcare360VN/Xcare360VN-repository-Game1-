@@ -103,8 +103,9 @@ function doGet(e) {
   
   try {
     const params = e.parameter;
-    const action = params.action;
-    console.log(`Hành động nhận được: "${action}", Tham số: ${JSON.stringify(params)}`);
+    // FIX: Làm sạch tham số 'action' để loại bỏ khoảng trắng thừa có thể gây lỗi.
+    const action = params.action ? params.action.trim() : null;
+    console.log(`Hành động đã xử lý: "${action}", Tham số: ${JSON.stringify(params)}`);
 
 
     switch (action) {
