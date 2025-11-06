@@ -8,8 +8,9 @@ const html = htm.bind(React.createElement);
 
 const ResultsCard = ({ question, selectedOption, onNextQuestion }) => {
   const [isCopied, setIsCopied] = useState(false);
-  // FIX: Explicitly set the return type of reduce to 'number' to prevent `totalVotes` from being inferred as `unknown`.
-  const totalVotes = Object.values(question.stats || {}).reduce<number>((sum, count) => sum + Number(count), 0);
+  // FIX: Remove TypeScript type annotations to make it valid JavaScript.
+  // Also, add a fallback for question.stats to prevent errors if it's null/undefined.
+  const totalVotes = Object.values(question.stats || {}).reduce((sum, count) => sum + Number(count), 0);
 
   const handleShare = async () => {
     const shareData = {
