@@ -1,4 +1,4 @@
-// Version 1.6 - Cải thiện độ tin cậy của việc xử lý hành động
+// Version 1.8 - Thêm endpoint kiểm tra phiên bản để gỡ lỗi
 // Chào mừng bạn đến với mã nguồn Google Apps Script cho trò chơi "Có Bao Nhiêu Người Giống Bạn?"
 //
 // HƯỚNG DẪN CÀI ĐẶT:
@@ -8,14 +8,16 @@
 // 4. Sao chép TOÀN BỘ nội dung của tệp này và dán vào trình soạn thảo.
 // 5. Nhấn vào biểu tượng "Lưu dự án" (hình đĩa mềm).
 // 6. Nhấn vào nút "Triển khai" (Deploy) > "Quản lý các bản triển khai" (Manage deployments).
-// 7. Tìm bản triển khai đang hoạt động của bạn (thường chỉ có một), nhấp vào biểu tượng bút chì ("Chỉnh sửa").
-// 8. Trong mục "Phiên bản" (Version), chọn "Phiên bản mới" (New version). << BƯỚC NÀY RẤT QUAN TRỌNG!
+// 7. Tìm bản triển khai đang hoạt động của bạn, nhấp vào biểu tượng bút chì ("Chỉnh sửa").
+// 8. !!! BƯỚC CỰC KỲ QUAN TRỌNG !!!
+//    Trong mục "Phiên bản" (Version), chọn "Phiên bản mới" (New version).
+//    Nếu bạn không làm bước này, các thay đổi của bạn sẽ không được áp dụng.
 // 9. Nhấn nút "Triển khai" (Deploy).
-// **QUAN TRỌNG**: Bằng cách này, bạn sẽ cập nhật ứng dụng web hiện có mà không thay đổi URL của nó.
 
 // ===============================================================================================
 
 const SS = SpreadsheetApp.getActiveSpreadsheet();
+const SCRIPT_VERSION = '1.8 - Hỗ trợ kiểm tra phiên bản';
 
 /**
  * Hàm trợ giúp để chuyển đổi một sheet thành một mảng các đối tượng JSON.
@@ -106,88 +108,95 @@ function doGet(e) {
     const action = params.action ? params.action.trim() : null;
     console.log(`Hành động đã xử lý: "${action}", Tham số: ${JSON.stringify(params)}`);
 
-    if (action === 'getSpreadsheetName') {
-      return createJsonResponse({ name: SS.getName() });
-    }
-    
-    if (action === 'getTopics') {
-      const myListSheet = SS.getSheetByName('Mylist');
-      if (!myListSheet) {
-        return createErrorResponse("Không tìm thấy sheet 'Mylist'. Hãy chắc chắn bạn đã tạo và đặt tên chính xác cho sheet này.");
+    switch (action) {
+      case 'getVersion': {
+        return createJsonResponse({ version: SCRIPT_VERSION });
       }
-      return createJsonResponse(sheetToJSON(myListSheet));
-    }
-    
-    if (action === 'getSponsors') {
-      const myInfoSheet = SS.getSheetByName('Myinfo');
-      if (!myInfoSheet) {
-        return createErrorResponse("Không tìm thấy sheet 'Myinfo'. Hãy chắc chắn bạn đã tạo và đặt tên chính xác cho sheet này.");
-      }
-      return createJsonResponse(sheetToJSON(myInfoSheet));
-    }
-    
-    if (action === 'getQuestions') {
-      const topicIdForQuestions = params.topicId;
-      if (!topicIdForQuestions) {
-        return createErrorResponse("Thiếu tham số 'topicId'.");
-      }
-      const questionSheet = SS.getSheetByName(topicIdForQuestions);
-      if (!questionSheet) {
-        return createErrorResponse(`Không tìm thấy sheet với tên: ${topicIdForQuestions}.`);
-      }
-      return createJsonResponse(sheetToJSON(questionSheet));
-    }
 
-    if (action === 'submit') {
-      const { topicId, questionId, selectedOption } = params;
-      if (!topicId || !questionId || !selectedOption) {
-          return createErrorResponse("Thiếu các tham số bắt buộc (topicId, questionId, selectedOption) để gửi.");
+      case 'getSpreadsheetName': {
+        return createJsonResponse({ name: SS.getName() });
+      }
+
+      case 'getTopics': {
+        const myListSheet = SS.getSheetByName('Mylist');
+        if (!myListSheet) {
+          return createErrorResponse("Không tìm thấy sheet 'Mylist'. Hãy chắc chắn bạn đã tạo và đặt tên chính xác cho sheet này.");
+        }
+        return createJsonResponse(sheetToJSON(myListSheet));
       }
       
-      const sheetToUpdate = SS.getSheetByName(topicId);
-      if (!sheetToUpdate) {
-        return createErrorResponse(`Không tìm thấy sheet '${topicId}' để cập nhật.`);
-      }
-
-      const data = sheetToUpdate.getDataRange().getValues();
-      const headers = data[0].map(h => h.toString().trim());
-      const idColIndex = headers.indexOf('id');
-      const statsColIndex = headers.indexOf('stats');
-
-      if (idColIndex === -1 || statsColIndex === -1) {
-          return createErrorResponse(`Sheet '${topicId}' thiếu cột 'id' hoặc 'stats'.`);
-      }
-
-      for (let i = 1; i < data.length; i++) {
-        if (data[i][idColIndex] === questionId) {
-          let stats;
-          try {
-            stats = JSON.parse(data[i][statsColIndex] || '{}');
-          } catch (jsonError) {
-            console.error(`Lỗi phân tích JSON ở hàng ${i+1} cho questionId ${questionId}: ${data[i][statsColIndex]}. Sẽ bắt đầu lại thống kê.`);
-            stats = {}; 
-          }
-          
-          let foundKey = Object.keys(stats).find(key => key.toLowerCase() === selectedOption.toLowerCase());
-          let keyToUpdate = foundKey || selectedOption;
-
-          stats[keyToUpdate] = (stats[keyToUpdate] || 0) + 1;
-          
-          sheetToUpdate.getRange(i + 1, statsColIndex + 1).setValue(JSON.stringify(stats));
-          return createJsonResponse({ status: 'success', message: 'Đã ghi lại câu trả lời.' });
+      case 'getSponsors': {
+        const myInfoSheet = SS.getSheetByName('Myinfo');
+        if (!myInfoSheet) {
+          return createErrorResponse("Không tìm thấy sheet 'Myinfo'. Hãy chắc chắn bạn đã tạo và đặt tên chính xác cho sheet này.");
         }
+        return createJsonResponse(sheetToJSON(myInfoSheet));
       }
-      return createErrorResponse(`Không tìm thấy câu hỏi với ID '${questionId}' trong sheet '${topicId}'.`);
-    }
+      
+      case 'getQuestions': {
+        const topicIdForQuestions = params.topicId;
+        if (!topicIdForQuestions) {
+          return createErrorResponse("Thiếu tham số 'topicId'.");
+        }
+        const questionSheet = SS.getSheetByName(topicIdForQuestions);
+        if (!questionSheet) {
+          return createErrorResponse(`Không tìm thấy sheet với tên: ${topicIdForQuestions}.`);
+        }
+        return createJsonResponse(sheetToJSON(questionSheet));
+      }
 
-    if (action === 'test') {
-        return createJsonResponse({ status: 'success', message: 'Kết nối GHI thành công.' });
-    }
+      case 'submit': {
+        const { topicId, questionId, selectedOption } = params;
+        if (!topicId || !questionId || !selectedOption) {
+            return createErrorResponse("Thiếu các tham số bắt buộc (topicId, questionId, selectedOption) để gửi.");
+        }
+        
+        const sheetToUpdate = SS.getSheetByName(topicId);
+        if (!sheetToUpdate) {
+          return createErrorResponse(`Không tìm thấy sheet '${topicId}' để cập nhật.`);
+        }
 
-    // Nếu không có hành động nào khớp, trả về lỗi
-    const allParams = JSON.stringify(params);
-    const errorMessage = `Hành động không  hợp lệ hoặc bị thiếu. Script đã nhận action='${action}'. Toàn bộ tham số: ${allParams}`;
-    return createErrorResponse(errorMessage);
+        const data = sheetToUpdate.getDataRange().getValues();
+        const headers = data[0].map(h => h.toString().trim());
+        const idColIndex = headers.indexOf('id');
+        const statsColIndex = headers.indexOf('stats');
+
+        if (idColIndex === -1 || statsColIndex === -1) {
+            return createErrorResponse(`Sheet '${topicId}' thiếu cột 'id' hoặc 'stats'.`);
+        }
+
+        for (let i = 1; i < data.length; i++) {
+          if (data[i][idColIndex] === questionId) {
+            let stats;
+            try {
+              stats = JSON.parse(data[i][statsColIndex] || '{}');
+            } catch (jsonError) {
+              console.error(`Lỗi phân tích JSON ở hàng ${i+1} cho questionId ${questionId}: ${data[i][statsColIndex]}. Sẽ bắt đầu lại thống kê.`);
+              stats = {}; 
+            }
+            
+            let foundKey = Object.keys(stats).find(key => key.toLowerCase() === selectedOption.toLowerCase());
+            let keyToUpdate = foundKey || selectedOption;
+
+            stats[keyToUpdate] = (stats[keyToUpdate] || 0) + 1;
+            
+            sheetToUpdate.getRange(i + 1, statsColIndex + 1).setValue(JSON.stringify(stats));
+            return createJsonResponse({ status: 'success', message: 'Đã ghi lại câu trả lời.' });
+          }
+        }
+        return createErrorResponse(`Không tìm thấy câu hỏi với ID '${questionId}' trong sheet '${topicId}'.`);
+      }
+
+      case 'test': {
+          return createJsonResponse({ status: 'success', message: 'Kết nối GHI thành công.' });
+      }
+
+      default: {
+        const allParams = JSON.stringify(params);
+        const errorMessage = `Hành động không hợp lệ hoặc bị thiếu. Script đã nhận action='${action}'. Toàn bộ tham số: ${allParams}`;
+        return createErrorResponse(errorMessage);
+      }
+    }
 
   } catch (error) {
     console.error(`Lỗi nghiêm trọng trong doGet: ${error.message}\nStack: ${error.stack}`);
