@@ -366,15 +366,27 @@
           const mostUniqueAnswer = userAnswers.reduce((min, current) => (current.percentage < min.percentage) ? current : min, userAnswers[0]);
           
           const handleShare = async () => {
-              const shareText = `Tôi đã hoàn thành chủ đề "${topicName}" trong trò chơi "Có Bao Nhiêu Người Giống Bạn?". Câu trả lời tương đồng nhất của tôi giống ${mostCommonAnswer.percentage}% người khác!`;
+              const shareText = `Tôi đã hoàn thành chủ đề "${topicName}" trong trò chơi "Có Bao Nhiêu Người Giống Bạn?". Câu trả lời tương đồng nhất của tôi giống ${mostCommonAnswer.percentage}% người khác! Bạn hãy thử xem sao nhé!`;
               const shareUrl = window.location.href; 
+              
               try {
-                  await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-                  setIsCopied(true);
-                  setTimeout(() => setIsCopied(false), 2500);
+                  if (navigator.share) {
+                      await navigator.share({
+                          title: 'Có Bao Nhiêu Người Giống Bạn?',
+                          text: shareText,
+                          url: shareUrl,
+                      });
+                  } else {
+                      await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+                      setIsCopied(true);
+                      setTimeout(() => setIsCopied(false), 2500);
+                  }
               } catch (err) {
-                  console.error('Lỗi khi sao chép:', err);
-                  alert('Không thể sao chép vào lúc này.');
+                  // Bỏ qua lỗi nếu người dùng hủy hộp thoại chia sẻ
+                  if (err.name !== 'AbortError') {
+                      console.error('Lỗi khi chia sẻ:', err);
+                      alert('Không thể chia sẻ vào lúc này.');
+                  }
               }
           };
           
@@ -504,7 +516,7 @@
                     <div class="text-center mt-8">
                       <button onClick=${handleReset} class="text-gray-500 hover:text-gray-300 text-sm flex items-center gap-2 mx-auto transition-colors">
                         <${TrashIcon} className="w-4 h-4"/>
-                        Xóa tiến trình
+                        Chơi lại từ đầu
                       </button>
                     </div>
                   `}
@@ -647,8 +659,11 @@
                       alert('Đã sao chép kết quả vào clipboard!');
                   }
               } catch (err) {
-                  console.error('Lỗi khi chia sẻ:', err);
-                  alert('Không thể chia sẻ vào lúc này.');
+                  // Bỏ qua lỗi nếu người dùng hủy hộp thoại chia sẻ
+                  if (err.name !== 'AbortError') {
+                      console.error('Lỗi khi chia sẻ:', err);
+                      alert('Không thể chia sẻ vào lúc này.');
+                  }
               }
           };
           
