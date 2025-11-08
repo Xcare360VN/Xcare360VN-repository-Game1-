@@ -1,4 +1,4 @@
-// Version 1.8 - Thêm endpoint kiểm tra phiên bản để gỡ lỗi
+// Version 1.9 - Tối ưu hóa tải dữ liệu ban đầu
 // Chào mừng bạn đến với mã nguồn Google Apps Script cho trò chơi "Có Bao Nhiêu Người Giống Bạn?"
 //
 // HƯỚNG DẪN CÀI ĐẶT:
@@ -17,7 +17,7 @@
 // ===============================================================================================
 
 const SS = SpreadsheetApp.getActiveSpreadsheet();
-const SCRIPT_VERSION = '1.8 - Hỗ trợ kiểm tra phiên bản';
+const SCRIPT_VERSION = '1.9 - Tải dữ liệu gộp';
 
 /**
  * Hàm trợ giúp để chuyển đổi một sheet thành một mảng các đối tượng JSON.
@@ -92,13 +92,46 @@ function createErrorResponse(message, statusCode = 400) {
 }
 
 /**
+ * Tìm nạp tất cả dữ liệu cần thiết cho ứng dụng trong một lần.
+ * @returns {object} Một đối tượng chứa topics, sponsors, và allQuestions.
+ */
+function fetchAllData() {
+  const myListSheet = SS.getSheetByName('Mylist');
+  if (!myListSheet) {
+    throw new Error("Không tìm thấy sheet 'Mylist'.");
+  }
+  const topics = sheetToJSON(myListSheet);
+
+  const myInfoSheet = SS.getSheetByName('Myinfo');
+  const sponsors = myInfoSheet ? sheetToJSON(myInfoSheet) : [];
+
+  const allQuestions = [];
+  topics.forEach(topic => {
+    if (topic.id) {
+      const questionSheet = SS.getSheetByName(topic.id);
+      if (questionSheet) {
+        const questions = sheetToJSON(questionSheet);
+        questions.forEach(q => {
+          q.originalTopicId = topic.id; // Gắn ID chủ đề gốc vào mỗi câu hỏi
+          allQuestions.push(q);
+        });
+      } else {
+        console.warn(`Không tìm thấy sheet cho chủ đề ID: ${topic.id}`);
+      }
+    }
+  });
+
+  return { topics, sponsors, allQuestions };
+}
+
+
+/**
  * Xử lý các yêu cầu GET đến ứng dụng web.
  * Đây là hàm chính điều hướng các hành động dựa trên tham số 'action'.
  * @param {object} e - Đối tượng sự kiện từ yêu cầu GET.
  * @returns {GoogleAppsScript.Content.TextOutput} Phản hồi JSON.
  */
 function doGet(e) {
-  // BƯỚC KIỂM TRA QUAN TRỌNG NHẤT: Script có được liên kết với một Sheet không?
   if (!SS) {
     return createErrorResponse("Lỗi nghiêm trọng: Script này không được liên kết với bất kỳ tệp Google Sheet nào. Vui lòng tạo script từ bên trong tệp Sheet của bạn qua menu 'Tiện ích mở rộng > Apps Script'.");
   }
@@ -113,35 +146,29 @@ function doGet(e) {
         return createJsonResponse({ version: SCRIPT_VERSION });
       }
 
-      case 'getSpreadsheetName': {
-        return createJsonResponse({ name: SS.getName() });
+      case 'getAllData': {
+        const allData = fetchAllData();
+        return createJsonResponse(allData);
       }
 
+      // Các endpoints cũ vẫn được giữ lại để tương thích ngược hoặc gỡ lỗi riêng lẻ
       case 'getTopics': {
         const myListSheet = SS.getSheetByName('Mylist');
-        if (!myListSheet) {
-          return createErrorResponse("Không tìm thấy sheet 'Mylist'. Hãy chắc chắn bạn đã tạo và đặt tên chính xác cho sheet này.");
-        }
+        if (!myListSheet) return createErrorResponse("Không tìm thấy sheet 'Mylist'.");
         return createJsonResponse(sheetToJSON(myListSheet));
       }
       
       case 'getSponsors': {
         const myInfoSheet = SS.getSheetByName('Myinfo');
-        if (!myInfoSheet) {
-          return createErrorResponse("Không tìm thấy sheet 'Myinfo'. Hãy chắc chắn bạn đã tạo và đặt tên chính xác cho sheet này.");
-        }
+        if (!myInfoSheet) return createErrorResponse("Không tìm thấy sheet 'Myinfo'.");
         return createJsonResponse(sheetToJSON(myInfoSheet));
       }
       
       case 'getQuestions': {
         const topicIdForQuestions = params.topicId;
-        if (!topicIdForQuestions) {
-          return createErrorResponse("Thiếu tham số 'topicId'.");
-        }
+        if (!topicIdForQuestions) return createErrorResponse("Thiếu tham số 'topicId'.");
         const questionSheet = SS.getSheetByName(topicIdForQuestions);
-        if (!questionSheet) {
-          return createErrorResponse(`Không tìm thấy sheet với tên: ${topicIdForQuestions}.`);
-        }
+        if (!questionSheet) return createErrorResponse(`Không tìm thấy sheet với tên: ${topicIdForQuestions}.`);
         return createJsonResponse(sheetToJSON(questionSheet));
       }
 
@@ -185,10 +212,6 @@ function doGet(e) {
           }
         }
         return createErrorResponse(`Không tìm thấy câu hỏi với ID '${questionId}' trong sheet '${topicId}'.`);
-      }
-
-      case 'test': {
-          return createJsonResponse({ status: 'success', message: 'Kết nối GHI thành công.' });
       }
 
       default: {

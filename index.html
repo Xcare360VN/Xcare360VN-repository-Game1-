@@ -102,19 +102,16 @@
         { name: 'Công ty Công nghệ Tuyệt vời', logoUrl: 'https://picsum.photos/seed/tech/100/100', websiteUrl: '#', isActive: true, content: 'Chúng tôi tự hào đồng hành cùng bạn trong hành trình khám phá bản thân. Công nghệ là để kết nối, và chúng tôi tin rằng việc hiểu rõ hơn về chính mình và cộng đồng là bước đầu tiên.' },
         { name: 'Thiên đường Thú cưng', logoUrl: 'https://picsum.photos/seed/pet/100/100', websiteUrl: '#', isActive: false, content: 'Mỗi thú cưng là một người bạn. Hãy yêu thương và chăm sóc chúng nhé!' }
       ];
-      const A01_PET_QUESTIONS = [
-        { id: 'P01', text: 'Bạn có tin rằng chó thực sự là "bạn thân nhất của con người" không?', options: ['Có', 'Không'], stats: JSON.stringify({ 'Có': 1843, 'Không': 211 }), dateAdded: getDaysAgo(30) },
-        { id: 'P02', text: 'Bạn thích nuôi mèo hơn nuôi chó?', options: ['Có', 'Không'], stats: JSON.stringify({ 'Có': 987, 'Không': 1067 }), dateAdded: getDaysAgo(25) },
-        { id: 'P03', text: 'Có nên nuôi động vật hoang dã làm thú cưng không?', options: ['Có', 'Không'], stats: JSON.stringify({ 'Có': 345, 'Không': 1709 }), dateAdded: getDaysAgo(2) }, // New question
-        { id: 'P04', text: 'Bạn sẽ chọn nuôi con vật nào?', options: ['Cá', 'Chim', 'Chuột Hamster', 'Rắn'], stats: JSON.stringify({ 'Cá': 890, 'Chim': 654, 'Chuột Hamster': 432, 'Rắn': 123 }), dateAdded: getDaysAgo(40) }
+      const MOCK_ALL_QUESTIONS = [
+        { id: 'P01', text: 'Bạn có tin rằng chó thực sự là "bạn thân nhất của con người" không?', options: ['Có', 'Không'], stats: { 'Có': 1843, 'Không': 211 }, dateAdded: getDaysAgo(30), originalTopicId: 'A01PET' },
+        { id: 'P02', text: 'Bạn thích nuôi mèo hơn nuôi chó?', options: ['Có', 'Không'], stats: { 'Có': 987, 'Không': 1067 }, dateAdded: getDaysAgo(25), originalTopicId: 'A01PET' },
+        { id: 'P03', text: 'Có nên nuôi động vật hoang dã làm thú cưng không?', options: ['Có', 'Không'], stats: { 'Có': 345, 'Không': 1709 }, dateAdded: getDaysAgo(2), originalTopicId: 'A01PET' },
+        { id: 'P04', text: 'Bạn sẽ chọn nuôi con vật nào?', options: ['Cá', 'Chim', 'Chuột Hamster', 'Rắn'], stats: { 'Cá': 890, 'Chim': 654, 'Chuột Hamster': 432, 'Rắn': 123 }, dateAdded: getDaysAgo(40), originalTopicId: 'A01PET' },
+        { id: 'AI01', text: 'Bạn có lo lắng một ngày nào đó AI sẽ chiếm lấy công việc của bạn không?', options: ['Có', 'Không'], stats: { 'Có': 1302, 'Không': 742 }, dateAdded: getDaysAgo(15), originalTopicId: 'B01All' },
+        { id: 'AI02', text: 'Bạn có nghĩ rằng AI cuối cùng sẽ trở nên thông minh hơn con người không?', options: ['Có', 'Không'], stats: { 'Có': 1655, 'Không': 389 }, dateAdded: getDaysAgo(12), originalTopicId: 'B01All' },
+        { id: 'AI03', text: 'Bạn có tin tưởng để một AI phẫu thuật cho mình không?', options: ['Có', 'Không'], stats: { 'Có': 210, 'Không': 1834 }, dateAdded: getDaysAgo(5), originalTopicId: 'B01All' },
+        { id: 'AI04', text: 'Đối với bạn, ứng dụng nào của AI là thú vị nhất?', options: ['Chăm sóc sức khỏe', 'Giao thông vận tải', 'Giải trí', 'Khoa học'], stats: { 'Chăm sóc sức khỏe': 788, 'Giao thông vận tải': 450, 'Giải trí': 312, 'Khoa học': 505 }, dateAdded: getDaysAgo(20), originalTopicId: 'B01All' }
       ];
-      const B01_AI_QUESTIONS = [
-        { id: 'AI01', text: 'Bạn có lo lắng một ngày nào đó AI sẽ chiếm lấy công việc của bạn không?', options: ['Có', 'Không'], stats: JSON.stringify({ 'Có': 1302, 'Không': 742 }), dateAdded: getDaysAgo(15) },
-        { id: 'AI02', text: 'Bạn có nghĩ rằng AI cuối cùng sẽ trở nên thông minh hơn con người không?', options: ['Có', 'Không'], stats: JSON.stringify({ 'Có': 1655, 'Không': 389 }), dateAdded: getDaysAgo(12) },
-        { id: 'AI03', text: 'Bạn có tin tưởng để một AI phẫu thuật cho mình không?', options: ['Có', 'Không'], stats: JSON.stringify({ 'Có': 210, 'Không': 1834 }), dateAdded: getDaysAgo(5) }, // New question
-        { id: 'AI04', text: 'Đối với bạn, ứng dụng nào của AI là thú vị nhất?', options: ['Chăm sóc sức khỏe', 'Giao thông vận tải', 'Giải trí', 'Khoa học'], stats: JSON.stringify({ 'Chăm sóc sức khỏe': 788, 'Giao thông vận tải': 450, 'Giải trí': 312, 'Khoa học': 505 }), dateAdded: getDaysAgo(20) }
-      ];
-      const QUESTION_BANKS = { 'A01PET': A01_PET_QUESTIONS, 'B01All': B01_AI_QUESTIONS };
 
       // --- GAME SERVICE ---
       const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbykpc4zubNxgaHYtDxkzpt4vmj9wuEKSbPMulbVahByUC_70Pe7st1n5MBAMuBn6_Y9kg/exec';
@@ -131,83 +128,42 @@
         }
         return data;
       }
-      async function getScriptVersion() {
-        try {
-          const data = await fetchFromApi('getVersion');
-          return data?.version || null;
-        } catch (error) {
-          console.error(`Không thể lấy phiên bản script:`, error);
-          return null;
-        }
-      }
-      function transformQuestion(rawData) {
-        const options = [];
-        if (rawData.opt1 && rawData.opt1 !== 'N/A') options.push(rawData.opt1);
-        if (rawData.opt2 && rawData.opt2 !== 'N/A') options.push(rawData.opt2);
-        if (rawData.opt3 && rawData.opt3 !== 'N/A') options.push(rawData.opt3);
-        if (rawData.opt4 && rawData.opt4 !== 'N/A') options.push(rawData.opt4);
-        let stats = {};
-        try {
-          stats = JSON.parse(rawData.stats);
-        } catch (e) {
-          console.error(`Không thể phân tích stats cho câu hỏi ID ${rawData.id}:`, rawData.stats);
-        }
-        return { id: rawData.id, text: rawData.question, options, stats, dateAdded: rawData.dateAdded };
-      }
-      async function getTopics() {
-        try {
-          const data = await fetchFromApi('getTopics');
-          if (!Array.isArray(data)) throw new Error("Topic data from sheet is not a valid array.");
-          if (data.length > 0 && (data[0].id === undefined || data[0].name === undefined || data[0].description === undefined)) {
-            console.error("Invalid topic structure received:", data[0]);
-            throw new Error("Topic data has an incorrect structure. Ensure 'id', 'name', and 'description' columns exist in 'Mylist' sheet.");
+       async function getInitialData() {
+          try {
+              const rawData = await fetchFromApi('getAllData');
+              
+              if (!rawData || !Array.isArray(rawData.topics) || !Array.isArray(rawData.sponsors) || !Array.isArray(rawData.allQuestions)) {
+                  throw new Error("Dữ liệu nhận được từ API không hợp lệ.");
+              }
+
+              const sponsors = rawData.sponsors.map(item => ({ ...item, isActive: String(item.isActive).toUpperCase() === 'TRUE' }));
+              
+              const allQuestions = rawData.allQuestions.map(q => {
+                  const options = [];
+                  if (q.opt1 && q.opt1 !== 'N/A') options.push(q.opt1);
+                  if (q.opt2 && q.opt2 !== 'N/A') options.push(q.opt2);
+                  if (q.opt3 && q.opt3 !== 'N/A') options.push(q.opt3);
+                  if (q.opt4 && q.opt4 !== 'N/A') options.push(q.opt4);
+                  
+                  let stats = {};
+                  try {
+                      stats = typeof q.stats === 'string' ? JSON.parse(q.stats) : (q.stats || {});
+                  } catch (e) {
+                      console.error(`Không thể phân tích stats cho câu hỏi ID ${q.id}:`, q.stats);
+                  }
+
+                  return { id: q.id, text: q.question, options, stats, dateAdded: q.dateAdded, originalTopicId: q.originalTopicId };
+              });
+              
+              return { topics: rawData.topics, sponsors, allQuestions };
+          } catch (error) {
+              console.warn(`Không thể tải dữ liệu ban đầu. Sử dụng dữ liệu dự phòng. Lỗi:`, error);
+              return {
+                  topics: MY_LIST,
+                  sponsors: MY_INFO,
+                  allQuestions: MOCK_ALL_QUESTIONS
+              };
           }
-          return data;
-        } catch (error) {
-          console.warn(`Không thể tải danh sách chủ đề. Sử dụng dữ liệu dự phòng. Lỗi:`, error);
-          return MY_LIST;
-        }
-      }
-      async function getSponsors() {
-        try {
-          const data = await fetchFromApi('getSponsors');
-          if (!Array.isArray(data)) throw new Error("Sponsor data is not a valid array.");
-          return data.map(item => ({ ...item, isActive: String(item.isActive).toUpperCase() === 'TRUE' }));
-        } catch (error) {
-          console.warn(`Không thể tải nhà tài trợ. Sử dụng dữ liệu dự phòng. Lỗi:`, error);
-          return MY_INFO;
-        }
-      }
-      async function getQuestionsForTopic(topicId) {
-        try {
-          const rawData = await fetchFromApi('getQuestions', { topicId });
-          if (!Array.isArray(rawData) || rawData.length === 0) throw new Error(`Dữ liệu câu hỏi cho chủ đề ${topicId} không hợp lệ hoặc rỗng.`);
-          return rawData.map(transformQuestion);
-        } catch (error) {
-          console.warn(`Không thể tải câu hỏi cho '${topicId}'. Sử dụng dữ liệu dự phòng. Lỗi:`, error);
-          const fallbackBank = QUESTION_BANKS[topicId] || [];
-          if (fallbackBank.length === 0) throw new Error(`Không tìm thấy câu hỏi nào (kể cả dự phòng) cho chủ đề '${topicId}'.`);
-          return fallbackBank.map(q => ({ ...q, stats: typeof q.stats === 'string' ? JSON.parse(q.stats) : q.stats }));
-        }
-      }
-      async function getAllQuestions(topics) {
-        try {
-          const questionPromises = topics.map(async (topic) => {
-            const questions = await getQuestionsForTopic(topic.id);
-            return questions.map(q => ({ ...q, originalTopicId: topic.id }));
-          });
-          const questionArrays = await Promise.all(questionPromises);
-          return questionArrays.flat();
-        } catch (error) {
-          console.warn(`Không thể tải tất cả câu hỏi. Sử dụng dữ liệu dự phòng. Lỗi:`, error);
-          const allMockQuestions = [];
-          for (const topicId in QUESTION_BANKS) {
-            const questions = QUESTION_BANKS[topicId];
-            const augmentedQuestions = questions.map(q => ({ ...q, stats: typeof q.stats === 'string' ? JSON.parse(q.stats) : q.stats, originalTopicId: topicId }));
-            allMockQuestions.push(...augmentedQuestions);
-          }
-          return allMockQuestions;
-        }
       }
       async function submitAnswer(topicId, questionId, selectedOption) {
         const params = { topicId, questionId, selectedOption };
@@ -216,6 +172,15 @@
           console.log(`Đã gửi thành công câu trả lời cho ${questionId}: ${selectedOption}`);
         } catch (error) {
           console.error('Lỗi mạng khi gửi câu trả lời:', error);
+        }
+      }
+      async function getScriptVersion() {
+        try {
+          const data = await fetchFromApi('getVersion');
+          return data?.version || null;
+        } catch (error) {
+          console.error(`Không thể lấy phiên bản script:`, error);
+          return null;
         }
       }
 
@@ -311,6 +276,7 @@
       const App = () => {
         const [activeSponsor, setActiveSponsor] = useState(null);
         const [allTopics, setAllTopics] = useState([]);
+        const [allQuestions, setAllQuestions] = useState([]);
         const [currentTopic, setCurrentTopic] = useState(null);
         const [questionBank, setQuestionBank] = useState([]);
         const [currentQuestion, setCurrentQuestion] = useState(null);
@@ -330,19 +296,13 @@
             setDiagnosticInfo({ scriptVersion: null, checkComplete: false });
             setGameState('loading');
             try {
-              const topics = await getTopics();
-              const [sponsors, allQuestions] = await Promise.all([
-                  getSponsors(),
-                  getAllQuestions(topics)
-              ]);
+              const { topics, sponsors, allQuestions: fetchedQuestions } = await getInitialData();
+              setAllQuestions(fetchedQuestions);
 
               const answeredIds = getAnsweredQuestionIds();
-              
               const topicsWithCompletion = topics.map(topic => {
-                  const questionsForTopic = allQuestions.filter(q => q.originalTopicId === topic.id);
-                  if (questionsForTopic.length === 0) {
-                      return { ...topic, isCompleted: false };
-                  }
+                  const questionsForTopic = fetchedQuestions.filter(q => q.originalTopicId === topic.id);
+                  if (questionsForTopic.length === 0) return { ...topic, isCompleted: false };
                   const isCompleted = questionsForTopic.every(q => answeredIds.includes(q.id));
                   return { ...topic, isCompleted };
               });
@@ -388,12 +348,12 @@
             const shuffledOld = shuffleArray(oldQuestions);
             return [...shuffledNew, ...shuffledOld];
         };
-        const handleSelectTopic = useCallback(async (topic) => {
+        const handleSelectTopic = useCallback((topic) => {
           setGameState('loading');
           setError(null);
           try {
-            const questions = await getQuestionsForTopic(topic.id);
-            const finalQuestionBank = prepareQuestionBank(questions, topic.name);
+            const questionsForTopic = allQuestions.filter(q => q.originalTopicId === topic.id);
+            const finalQuestionBank = prepareQuestionBank(questionsForTopic, topic.name);
             setQuestionBank(finalQuestionBank);
             setCurrentQuestion(finalQuestionBank[0]);
             setCurrentTopic(topic);
@@ -404,13 +364,12 @@
             setError(e instanceof Error ? e.message : 'Không thể tải câu hỏi cho chủ đề này.');
             setGameState('selection');
           }
-        }, []);
-        const handleSelectRandomMix = useCallback(async () => {
+        }, [allQuestions]);
+        const handleSelectRandomMix = useCallback(() => {
           setGameState('loading');
           setError(null);
           try {
-            const questions = await getAllQuestions(allTopics);
-            const finalQuestionBank = prepareQuestionBank(questions, RANDOM_TOPIC.name);
+            const finalQuestionBank = prepareQuestionBank(allQuestions, RANDOM_TOPIC.name);
             setQuestionBank(finalQuestionBank);
             setCurrentQuestion(finalQuestionBank[0]);
             setCurrentTopic(RANDOM_TOPIC);
@@ -421,7 +380,7 @@
             setError(e instanceof Error ? e.message : 'Không thể tải câu hỏi để trộn.');
             setGameState('selection');
           }
-        }, [allTopics]);
+        }, [allQuestions]);
         const handleNewGame = () => {
           setGameState('selection');
           setError(null);
