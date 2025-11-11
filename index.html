@@ -43,6 +43,14 @@
         animation: slideDown 0.5s ease-out forwards;
         overflow: hidden;
       }
+      /* Font size adjustments */
+      .font-size-large .text-xs { font-size: 0.875rem; line-height: 1.25rem; } /* sm */
+      .font-size-large .text-sm { font-size: 1rem; line-height: 1.5rem; } /* base */
+      .font-size-large .text-base { font-size: 1.125rem; line-height: 1.75rem; } /* lg */
+      .font-size-large .text-lg { font-size: 1.25rem; line-height: 1.75rem; } /* xl */
+      .font-size-large .text-xl { font-size: 1.5rem; line-height: 2rem; } /* 2xl */
+      .font-size-large .text-3xl { font-size: 2.25rem; line-height: 2.5rem; } /* 4xl */
+      .font-size-large .text-4xl { font-size: 3rem; line-height: 1; } /* 5xl */
     </style>
   </head>
   <body>
@@ -113,6 +121,21 @@
         } catch (error) {
             console.error('Không thể xóa tiến trình đã lưu:', error);
         }
+      };
+      const getFontSizePreference = () => {
+          try {
+              return localStorage.getItem('fontSizePreference');
+          } catch (error) {
+              console.error('Không thể đọc cài đặt cỡ chữ từ localStorage:', error);
+              return null;
+          }
+      };
+      const setFontSizePreference = (size) => {
+          try {
+              localStorage.setItem('fontSizePreference', size);
+          } catch (error) {
+              console.error('Không thể lưu cài đặt cỡ chữ vào localStorage:', error);
+          }
       };
 
 
@@ -206,32 +229,75 @@
       const CheckCircleIcon = ({ className = 'w-6 h-6' }) => html`<svg xmlns="http://www.w3.org/2000/svg" class=${className} viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>`;
       const TrashIcon = ({ className = 'w-6 h-6' }) => html`<svg xmlns="http://www.w3.org/2000/svg" class=${className} viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>`;
       const ChevronDownIcon = ({ className = 'w-6 h-6' }) => html`<svg xmlns="http://www.w3.org/2000/svg" class=${className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`;
+      const CalendarIcon = ({ className = 'w-6 h-6' }) => html`<svg xmlns="http://www.w3.org/2000/svg" class=${className} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`;
 
       // --- COMPONENTS ---
+      const FontSizeSelector = ({ currentSize, onSizeChange }) => {
+          return html`
+              <div class="bg-gray-700/50 p-1 rounded-full flex items-center space-x-1 ring-1 ring-white/10">
+                  <button
+                      onClick=${() => onSizeChange('normal')}
+                      class=${`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 ${currentSize === 'normal' ? 'bg-cyan-500 text-white shadow' : 'text-gray-300 hover:bg-gray-600/50'}`}
+                      aria-pressed=${currentSize === 'normal'}
+                  >
+                      Thường
+                  </button>
+                  <button
+                      onClick=${() => onSizeChange('large')}
+                      class=${`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 ${currentSize === 'large' ? 'bg-cyan-500 text-white shadow' : 'text-gray-300 hover:bg-gray-600/50'}`}
+                      aria-pressed=${currentSize === 'large'}
+                  >
+                      Lớn
+                  </button>
+              </div>
+          `;
+      };
+      
       const SponsorBanner = ({ sponsors }) => {
+          const [isExpanded, setIsExpanded] = useState(true);
           const activeSponsor = sponsors.find(s => s.isActive);
+          
           if (!activeSponsor) return null;
+          
           const { name, logoUrl, websiteUrl, content } = activeSponsor;
           const safeLogoUrl = convertGoogleDriveUrl(logoUrl);
           const safeWebsiteUrl = normalizeUrl(websiteUrl);
 
           return html`
-              <div class="bg-[#1e1b4b]/60 backdrop-blur-sm rounded-lg p-5 mt-8 animate-fade-in ring-1 ring-white/10">
-                  <h3 class="text-sm font-semibold text-gray-400 mb-4 tracking-wider text-center uppercase">Thông điệp từ nhà tài trợ</h3>
-                  <p class="text-base text-gray-200 text-justify mb-4">${content}</p>
+              <div class="bg-[#1e1b4b]/60 backdrop-blur-sm rounded-lg mt-8 animate-fade-in ring-1 ring-white/10">
+                  <button 
+                      class="flex justify-between items-center w-full p-4 text-left"
+                      onClick=${() => setIsExpanded(!isExpanded)}
+                      aria-expanded=${isExpanded}
+                      aria-controls="sponsor-content"
+                  >
+                      <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Thông điệp từ nhà tài trợ</h3>
+                      <${ChevronDownIcon} className=${`w-5 h-5 text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                  </button>
                   
-                  ${websiteUrl && websiteUrl !== '#' && html`
-                      <a href=${safeWebsiteUrl} target="_blank" rel="noopener noreferrer" class="text-base text-cyan-400 hover:text-cyan-300 transition-colors duration-200 mt-2 text-left block font-bold">
-                          Kết nối ngay →
-                      </a>
-                  `}
-                  
-                  <div class="border-t border-white/10 my-4"></div>
+                  <div 
+                    id="sponsor-content"
+                    class=${`grid transition-all duration-500 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+                  >
+                      <div class="overflow-hidden">
+                          <div class="px-4 pb-4">
+                              <p class="text-base text-gray-200 text-justify mb-4">${content}</p>
+                              
+                              ${websiteUrl && websiteUrl !== '#' && html`
+                                  <a href=${safeWebsiteUrl} target="_blank" rel="noopener noreferrer" class="text-base text-cyan-400 hover:text-cyan-300 transition-colors duration-200 mt-2 text-left block font-bold">
+                                      Kết nối ngay →
+                                  </a>
+                              `}
+                              
+                              <div class="border-t border-white/10 my-4"></div>
 
-                  <div class="text-xs text-gray-500 text-center">Được tài trợ bởi</div>
-                  <div class="flex items-center justify-center space-x-2 mt-2">
-                      <img src=${safeLogoUrl} alt=${`Logo ${name}`} class="w-5 h-5 rounded-full object-cover" />
-                      <span class="text-xs text-gray-400 font-medium">${name}</span>
+                              <div class="text-xs text-gray-500 text-center">Được tài trợ bởi</div>
+                              <div class="flex items-center justify-center space-x-2 mt-2">
+                                  <img src=${safeLogoUrl} alt=${`Logo ${name}`} class="w-5 h-5 rounded-full object-cover" />
+                                  <span class="text-xs text-gray-400 font-medium">${name}</span>
+                              </div>
+                          </div>
+                      </div>
                   </div>
               </div>
           `;
@@ -424,7 +490,7 @@
           `;
       };
 
-      const TopicSelection = ({ topics, onSelectTopic, allQuestions, onResetProgress }) => {
+      const TopicSelection = ({ topics, onSelectTopic, allQuestions, onResetProgress, fontSize, onFontSizeChange }) => {
           const [answeredQuestions, setAnsweredQuestions] = useState(getAnsweredQuestions());
           const [showCompleted, setShowCompleted] = useState(false);
           const answeredIds = answeredQuestions.map(a => a.qId);
@@ -451,9 +517,18 @@
                   <header class="text-center mb-8">
                       <h1 class="text-4xl font-extrabold text-white">Có Bao Nhiêu Người</h1>
                       <h1 class="text-4xl font-extrabold text-cyan-400 mb-2">Giống Bạn?</h1>
-                      <p class="text-gray-400">Bạn đang ở nhóm nào?</p>
+                      <p class="text-gray-400 mb-6">Bạn đang ở nhóm nào?</p>
+                       <div class="inline-flex items-center justify-center gap-2 text-sm text-cyan-300/90 bg-cyan-900/30 ring-1 ring-cyan-400/20 px-4 py-2 rounded-full">
+                          <${CalendarIcon} className="w-4 h-4" />
+                          <span>Câu hỏi được cập nhật hàng ngày</span>
+                      </div>
                   </header>
                   
+                   <div class="flex justify-center items-center gap-3 my-8">
+                      <span class="text-sm text-gray-400 font-medium">Cỡ chữ:</span>
+                      <${FontSizeSelector} currentSize=${fontSize} onSizeChange=${onFontSizeChange} />
+                  </div>
+
                   <div class="bg-[#1e1b4b]/60 backdrop-blur-sm rounded-lg p-6 mb-6 ring-1 ring-white/10">
                       <h2 class="text-xl font-bold text-white mb-4">Chọn chế độ chơi</h2>
                       <div 
@@ -485,7 +560,7 @@
                                       <span class="text-xs font-medium text-gray-400 bg-gray-600 px-2 py-1 rounded-full">${topic.answeredCount}/${topic.totalQuestions}</span>
                                     `}
                                   </div>
-                                  <p class="text-sm text-gray-300 mt-1">${topic.description}</p>
+                                  <p class="text-sm text-gray-300 mt-1 text-justify">${topic.description}</p>
                               </div>
                           `)}
                       </div>
@@ -538,6 +613,7 @@
               summaryData: [],
           });
           const [error, setError] = useState(null);
+          const [fontSize, setFontSize] = useState(() => getFontSizePreference() || 'normal');
 
           useEffect(() => {
               const loadData = async () => {
@@ -552,6 +628,19 @@
               };
               loadData();
           }, []);
+          
+          useEffect(() => {
+            if (fontSize === 'large') {
+                document.documentElement.classList.add('font-size-large');
+            } else {
+                document.documentElement.classList.remove('font-size-large');
+            }
+          }, [fontSize]);
+          
+          const handleFontSizeChange = (newSize) => {
+              setFontSize(newSize);
+              setFontSizePreference(newSize);
+          };
 
           const startQuiz = (topicId) => {
               const answeredIds = getAnsweredQuestions().map(a => a.qId);
@@ -693,7 +782,14 @@
                   case 'error':
                        return html`<div class="flex justify-center items-center h-screen text-lg text-red-400 p-8 text-center">${error}</div>`;
                   case 'topicSelection':
-                      return html`<${TopicSelection} topics=${topics} allQuestions=${allQuestions} onSelectTopic=${startQuiz} onResetProgress=${handleResetProgress} />`;
+                      return html`<${TopicSelection} 
+                                      topics=${topics} 
+                                      allQuestions=${allQuestions} 
+                                      onSelectTopic=${startQuiz} 
+                                      onResetProgress=${handleResetProgress}
+                                      fontSize=${fontSize}
+                                      onFontSizeChange=${handleFontSizeChange} 
+                                  />`;
                   case 'playing': {
                       const currentQuestion = questionQueue[currentQuestionIndex];
                       return html`<${QuestionCard} 
